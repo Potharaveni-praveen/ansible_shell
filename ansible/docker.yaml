@@ -1,0 +1,55 @@
+---
+- name: install Python
+  hosts: docker-servet
+  become: yes
+  become_user: root
+  tasks:
+    - name: Install Python3 and docker
+      vars:
+       ansible_python_interpreter: /usr/bin/python 
+      yum: 
+       name: 
+        - python3
+        - docker
+       update_cache: yes
+       state: present
+
+- name: Install Docker compose
+  hosts: docker-server
+  become: yes
+  become_user: root
+  tasks:
+    - name: Install Docker compose  
+      get_url:
+       url: pass url
+       dest: /usr/local/bin
+       mode: +x
+
+- name : start docker
+  hosts: docker-server
+  become: yes
+  tasks:
+    - name: Start docker daemon
+      systemd:
+        name: docker
+        state: started
+
+- name: add ec2-user to the docker group
+  hosts: docker-server
+  become: yes
+  tasks:
+    - name: add ec2-user to the docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+    - name: reconnect to the session
+      meta: reset_connection 
+
+- name: pull redis
+  hosts: docker-server
+  tasks:
+    - name: pull redis
+      command: docker pull redis
+     
+
